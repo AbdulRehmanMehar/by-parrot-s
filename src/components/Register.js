@@ -1,200 +1,148 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
-import firebase from '../Firebase';
+import { registerUser } from '../store/actions/authActions';
+import { validateName, validateEmail, validatePhoto, validatePassword, validateMatch, validateAddress, validatePhone } from '../store/actions/validationActions';
 
 
-export default class Regiser extends Component {
+class Regiser extends Component {
 
     constructor() {
         super();
         this.state = {
             name: '',
             email: '',
+            phone: '',
             photo: '',
+            address: '',
             password: '',
             cpassword: '',
-            errors: [], 
         }; 
-    }
-
-    componentDidMount() {
-        firebase.auth().onAuthStateChanged(user => {
-            if (user !== null) this.setState({ redirect: true });
-            else this.setState({ redirect: false })
-        });
     }
 
     setName(event) {
         let name = event.target.value;
-        let errors = this.state.errors;
-        let data = 'Name must minimum 3 characters long.';
-        this.setState({name: name});
-        if(name.length < 3){
-            errors = errors.filter(error => error.type !== 'name' && error.data !== data);
-            errors.push({type: 'name', data: data});
-            this.setState({errors: errors});
-        }else{
-            errors = errors.filter(error => error.type !== 'name');
-            this.setState({ errors: errors });
-        }
+        this.setState({ name: name });
+        this.props.name(name);
     }
 
     setEmail(event) {
         let email = event.target.value;
-        let errors = this.state.errors;
-        let data = 'Please provide a valid email address.';
         this.setState({ email: email });
-        // eslint-disable-next-line
-        let re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        if(!re.test(email)){
-            errors = errors.filter(error => error.type !== 'email' && error.data !== data);
-            errors.push({type: 'email', data: data});
-            this.setState({errors: errors});
-        }else{
-            errors = errors.filter(error => error.type !== 'email');
-            this.setState({ errors: errors });
-        }
+        this.props.email(email);
+    }
+
+    setPhone(event) {
+        let phone = event.target.value;
+        this.setState({ phone: phone });
+        this.props.phone(phone);
     }
 
     setPhoto(event) {
         let file = event.target.files[0];
-        let ext = file.name.toLowerCase().split('.').pop();
-        let errors = this.state.errors;
-        let data = 'The select file doesn\'t seem a valid image file.';
-        if(ext === 'jpg' || ext === 'png' || ext === 'gif' || ext === 'svg'){
-            errors = errors.filter(error => error.type !== 'photo');
-            this.setState({photo: file});
-            this.setState({errors: errors});
+        this.setState({ photo: file });
+        this.props.photo(file);
+        if(file) {
+            document.getElementById('customFileLabel').innerText = file.name;
         }else{
-            errors = errors.filter(error => error.type !== 'photo' && error.data !== data);
-            errors.push({type: 'photo', data: data});
-            this.setState({errors: errors});
+            document.getElementById('customFileLabel').innerText = 'Choose Photo';
         }
     }
 
     setPassword(event) {
-        let re = /^(?=.*\d)(?=.*[a-zA-Z])(?!.*\s).{8,12}$/;
-        let errors = this.state.errors;
         let password = event.target.value;
-        let data = 'Your password must 8 - 12 characters long and must contain at least one number.';
         this.setState({ password: password });
-        if(!re.test(password)){
-            errors = errors.filter(error => error.type !== 'password' && error.data !== data);
-            errors.push({ type: 'password', data: data});
-            this.setState({ errors: errors });
-        }else{
-            errors = errors.filter(error => error.type !== 'password');
-            this.setState({ errors: errors });
-        }
+        this.props.password(password);
     }
 
     setCpassword(event) {
-        let errors = this.state.errors;
-        let password = event.target.value;
-        let data = 'Password and confirm password don\'t match.';
-        this.setState({ cpassword: password });
-        if (this.state.password !== password){
-            errors = errors.filter(error => error.type !== 'password' && error.data !== data);
-            errors.push({ type: 'password', data: data });
-            this.setState({ errors: errors });
-        } else {
-            errors = errors.filter(error => error.type !== 'password');
-            this.setState({ errors: errors });
-        }
+        let cpwd = event.target.value;
+        this.setState({ cpassword: cpwd });
+        this.props.match(this.state.password, cpwd);
+    }
+
+    setAddress(event) {
+        let address = event.target.value;
+        this.setState({ address: address });
+        this.props.address(address);
     }
 
     register(event) {
-        let errors = this.state.errors;
-        if (this.state.email === '' || this.state.password === '' || this.state.cpassword === '' || this.state.errors.length > 0){
-            let data = 'It seems that the form is invalid.';
-            errors = errors.filter(error => error.type !== 'general' && error.data !== data);
-            errors.push({ type: 'general', data: data });
-            this.setState({ errors: errors });
-        }else{
-            firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password)
-                .then(response => {
-                    let uid = this.state.email.split('@').unshift();
-                    let ref = firebase.storage().ref().child('profile-picture/'+ uid + '_' +this.state.photo.name);
-                    ref.put(this.state.photo)
-                        .then(snapshot => {
-                            ref.getDownloadURL()
-                                .then(url => {
-                                    firebase.auth().onAuthStateChanged(user => {
-                                        user.updateProfile({
-                                            photoURL: url,
-                                            displayName: this.state.name
-                                        }).then(_ => this.setState({redirect: true}));
-                                    });
-                                });
-                        });
-                }).catch(error => {
-                    errors = errors.filter(err => err.type !== 'email' && err.data !== error.message);
-                    errors.push({ type: 'email', data: error.message });
-                    this.setState({ errors: errors });
-                });
-        }
         event.preventDefault();
+        this.props.register(this.state);
     }
 
     render() {
-        let nameErrors = '',
-            emailErrors = '',
-            photoErrors = '',
-            passwordErrors = '',
-            generalErrors = '';
-        this.state.errors.forEach(error => {
-            if (error.type === 'name') {
-                nameErrors += `<small>${error.data}</small><br />`;
-            }else if(error.type === 'email'){
-                emailErrors += `<small>${error.data}</small><br />`;
-            }else if(error.type === 'photo') {
-                photoErrors += `<small>${error.data}</small><br />`;
-            }else if(error.type === 'password'){
-                passwordErrors += `<small>${error.data}</small><br />`;
-            }else{
-                generalErrors += `<small>${error.data}</small><br />`;
-            }
-        });
-        if (this.state.redirect) return <Redirect to="/dashboard" />;
+        if (this.props.auth.uid) return <Redirect to="/dashboard" />;
         return (
             <div className="container mt-4">
                 <div className="card">
                     <div className="card-header">Register</div>
                     <div className="card-body">
                         <form onSubmit={this.register.bind(this)}>
-                            <div className="form-group">
-                                <label htmlFor="name">Name</label>
-                                <input type="name" className="form-control" id="name" placeholder="Jone Doe" min="5" onChange={this.setName.bind(this)} value={this.state.name} />
-                                <div className="form-text text-danger" dangerouslySetInnerHTML={{ __html: nameErrors }}></div>
-                            </div>
                             <div className="form-row">
+                                <div className="form-group col">
+                                    <label htmlFor="name">Name</label>
+                                    <input type="name" className="form-control" id="name" placeholder="Jone Doe" min="5" onChange={this.setName.bind(this)} value={this.state.name} />
+                                    <small className="form-text text-danger">{this.props.nameError}</small>
+                                </div>
                                 <div className="form-group col">
                                     <label htmlFor="email">Email address</label>
                                     <input type="email" className="form-control" id="email" placeholder="jone@doe.io" onChange={this.setEmail.bind(this)} value={this.state.email} />
-                                    <div className="form-text text-danger" dangerouslySetInnerHTML={{ __html: emailErrors }}></div>
+                                    <small className="form-text text-danger">{this.props.emailError}</small>
+                                </div>
+                            </div>
+                            <div className="form-row">
+                                <div className="form-group col">
+                                    <label htmlFor="phone">Phone Number</label>
+                                    <input type="number" className="form-control" id="phone" placeholder="+92 300 1234567" onChange={this.setPhone.bind(this)} value={this.state.phone} />
+                                    <small className="form-text text-danger">{this.props.phoneError}</small>
                                 </div>
                                 <div className="form-group col">
                                     <label htmlFor="customFile">Profile Picture</label>
                                     <div className="custom-file">
                                         <input type="file" className="custom-file-input" id="customFile" accept="image/*" onChange={this.setPhoto.bind(this)} />
-                                        <label className="custom-file-label" htmlFor="customFile">Choose photo</label>
+                                        <label className="custom-file-label" id="customFileLabel" htmlFor="customFile">Choose photo</label>
                                     </div>
-                                    <div className="form-text text-danger d-block" dangerouslySetInnerHTML={{ __html: photoErrors }}></div>
+                                    <small className="form-text text-danger d-block">{this.props.photoError}</small>
                                 </div>
                             </div>
                             <div className="form-row">
                                 <div className="form-group col">
                                     <label htmlFor="pwd">Password</label>
                                     <input type="password" className="form-control" id="pwd" placeholder="*********" onChange={this.setPassword.bind(this)} value={this.state.password} />
-                                    <div className="form-text text-danger" dangerouslySetInnerHTML={{ __html: passwordErrors }}></div>
+                                    <small className="form-text text-danger">{this.props.passwordError || this.props.mismatchError}</small>
                                 </div>
                                 <div className="form-group col">
                                     <label htmlFor="cpwd">Confirm Password</label>
                                     <input type="password" className="form-control" id="cpwd" placeholder="*********" onChange={this.setCpassword.bind(this)} value={this.state.cpassword} />
                                 </div>
                             </div>
-                            <div className="form-text text-danger" dangerouslySetInnerHTML={{ __html: generalErrors }}></div>
-                            <button type="submit" className="btn btn-primary" disabled={this.state.errors.length > 0 || this.state.name === '' || this.state.email === '' || this.state.photo === '' || this.state.password === '' || this.state.cpassword === ''}>Regiser</button>
+                            <div className="form-group">
+                                <label htmlFor="address">Shipping Address</label>
+                                <textarea className="form-control" id="address" placeholder="Satellite Town Gujranwala Pakistan" onChange={this.setAddress.bind(this)}>{this.state.address}</textarea>
+                                <small className="form-text text-danger">{this.props.addressError}</small>
+                            </div>
+                            <small className="form-text mb-2 text-danger">{ this.props.regError }</small>
+                            <button type="submit" className="btn btn-primary"
+                                disabled={
+                                    !this.state.name || 
+                                    !this.state.email || 
+                                    !this.state.phone || 
+                                    !this.state.photo || 
+                                    !this.state.address || 
+                                    !this.state.password || 
+                                    !this.state.cpassword ||
+                                    this.props.nameError ||
+                                    this.props.emailError ||
+                                    this.props.phoneError ||
+                                    this.props.photoError ||
+                                    this.props.addressError ||
+                                    this.props.passwordError ||
+                                    this.props.mismatchError 
+                            }>
+                                Regiser
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -202,3 +150,32 @@ export default class Regiser extends Component {
         )
     }
 }
+
+const mapStateToProps = (state) => {
+    return {
+        auth: state.firebase.auth,
+        regError: state.auth.regError,
+        nameError: state.validator.nameError,
+        emailError: state.validator.emailError,
+        phoneError: state.validator.phoneError,
+        photoError: state.validator.photoError,
+        addressError: state.validator.addressError,
+        passwordError: state.validator.passwordError,
+        mismatchError: state.validator.mismatchError,
+    }
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        name: (name) => dispatch(validateName(name)),
+        match: (x, y) => dispatch(validateMatch(x, y)),
+        email: (email) => dispatch(validateEmail(email)),
+        phone: (phone) => dispatch(validatePhone(phone)),
+        photo: (photo) => dispatch(validatePhoto(photo)),
+        address: (add) => dispatch(validateAddress(add)),
+        password: (password) => dispatch(validatePassword(password)),
+        register: (credentials) => dispatch(registerUser(credentials)),
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Regiser);
