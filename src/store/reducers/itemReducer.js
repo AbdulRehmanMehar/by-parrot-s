@@ -8,7 +8,21 @@ const init = {
 };
 
 const itemReducer = (state = init, action) => {
-    return state;
+    switch(action.type){
+        case 'CATEGORY_ERROR':
+            return {
+                ...state,
+                categoryError: action.message
+            }
+        case 'CATEGORY_SUCCESS':
+            return {
+                ...state,
+                categoryError: null,
+                categorySuccess: action.message
+            }
+        default:
+            return state;
+    }
 };
 
 export default itemReducer;
