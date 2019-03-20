@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 class Home extends Component{
     render(){
         let items = this.props.items.map(item => (
-            <div id={`item-${item.id}`}>
+            <div id={`item-${item.id}`} key={item.id}>
                 <h3>{item.title}</h3>
                 <p>{item.description}</p>
             </div>
