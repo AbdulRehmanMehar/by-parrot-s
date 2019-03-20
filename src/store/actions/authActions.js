@@ -39,8 +39,8 @@ export const registerUser = (credentials) => {
                                         photoURL: url,
                                         displayName: credentials.name
                                     }).then(_ => {
-                                        let db = firebase.database();
-                                        db.ref('users/' + user.uid).set({
+                                        let db = firebase.firestore();
+                                        db.collection('users').doc(user.uid).set({
                                             email: user.email,
                                             photo: user.photoURL,
                                             name: user.displayName,
@@ -52,21 +52,5 @@ export const registerUser = (credentials) => {
                             }).catch(error => dispatch({ type: 'REGISTER_ERROR', error }));
                     }).catch(error => dispatch({ type: 'REGISTER_ERROR', error }));
             }).catch(error => dispatch({ type: 'REGISTER_ERROR', error }));
-    };
-};
-
-export const getUser = () => {
-    return (dispatch, getState, { getFirebase }) => {
-        let db = getFirebase().database();
-        let { auth } = getState().firebase;
-        console.log(auth);
-        if(auth.uid){
-            let ref = db.ref('users/' + auth.uid);
-            ref.on('value', (snapshot) => {
-                dispatch({ type: 'GOT_USER', user: snapshot.val() });
-            });
-        }else{
-            dispatch({ type: 'GOT_USER', user: null });
-        }
     };
 };
