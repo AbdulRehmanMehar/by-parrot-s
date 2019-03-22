@@ -3,7 +3,7 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { firestoreConnect } from 'react-redux-firebase';
 import { validateName } from '../../store/actions/validationActions';
-import { createCategory } from '../../store/actions/itemActions';
+import { createCategory, updateCategory } from '../../store/actions/itemActions';
 
 
 class Add extends Component{
@@ -12,7 +12,18 @@ class Add extends Component{
         this.state = {
             name: '',
             parent: '',
+            isEdit: false
         };
+    }
+
+    componentDidMount() {
+        if (this.props.id && this.props.categories){
+            let category = this.props.categories.filter(cat => cat.id === this.props.id)[0];
+            this.setState({ id: this.props.id });
+            this.setState({ name: category.name });
+            this.setState({ parent: category.parent });
+            this.setState({ isEdit: true });
+        }
     }
 
     setName(event) {
@@ -28,11 +39,15 @@ class Add extends Component{
 
     submit(event) {
         event.preventDefault();
-        this.props.create(this.state);
+        if(this.state.isEdit){
+            this.props.update(this.state);
+        }else{
+            this.props.create(this.state);
+        }
         setTimeout(() => {
             this.setState({ name: '' });
             this.setState({ parent: '' });
-        }, 2000);
+        }, 1000);
     }
 
     render() {
@@ -61,7 +76,7 @@ class Add extends Component{
                 <button type="submit" className="btn btn-info" disabled={
                     !this.state.name ||
                     this.props.nameError
-                }>Add</button>
+                }>{this.state.isEdit ? "Update" : "Add" }</button>
             </form>
         )
     }
@@ -79,7 +94,8 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         name: (name) => dispatch(validateName(name)),
-        create: (category) => dispatch(createCategory(category))
+        create: (category) => dispatch(createCategory(category)),
+        update: (category) => dispatch(updateCategory(category))
     }
 };
 
