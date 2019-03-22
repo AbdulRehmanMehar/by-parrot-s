@@ -26,6 +26,17 @@ export const createCategory = (category) => {
     };
 };
 
+export const updateCategory = (category) => {
+    return (dispatch, getState, { getFirestore }) => {
+        const firestore = getFirestore();
+        const ref = firestore.collection('categories'); 
+        ref.doc(category.id).update({
+            name: category.name,
+            parent: category.parent
+        }).then(_ => dispatch({ type: 'CATEGORY_SUCCESS', message: 'Update was successfull.' }));
+    };
+};
+
 export const deleteCategory = (id) => {
     return (dispatch, getState, { getFirestore }) => {
         const firestore = getFirestore();
