@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import { Redirect, Link } from 'react-router-dom';
 import Add from './Add';
 import View from './View';
-import Edit from './Edit';
 
 class Category extends Component {
 
@@ -27,7 +26,7 @@ class Category extends Component {
         if(params.get('section') === 'add'){
             component = <Add />
         }else if(params.get('section') === 'edit'){
-            component = <Edit id={params.get('id')} />
+            component = <Add id={params.get('id')} />
         }else if(params.get('section') === 'view'){
             component = <View />
 

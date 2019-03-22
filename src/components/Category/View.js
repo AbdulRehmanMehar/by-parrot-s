@@ -31,7 +31,7 @@ class View extends Component{
                         <td>{cat.name}</td>
                         <td>{parent ? parent.name : null}</td>
                         <td>
-                            <Link to="/manage-categories?section=edit">Edit</Link> | 
+                            <Link to={"/manage-categories?section=edit&id=" + cat.id}>Edit</Link> | 
                             <Link to="#" onClick={this.delete.bind(this)} id={cat.id} isparent={child.length > 0 ? 'true' : 'false' }> Delete</Link>
                         </td>
                     </tr>
