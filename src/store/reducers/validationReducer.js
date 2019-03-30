@@ -37,6 +37,11 @@ const validationReducer = (state = init, action) => {
                 ...state,
                 mismatchError: action.message
             }
+        case 'PRICE_ERROR':
+            return {
+                ...state,
+                priceError: action.message
+            }
         default:
             return state;
     }

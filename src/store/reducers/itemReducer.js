@@ -20,6 +20,17 @@ const itemReducer = (state = init, action) => {
                 categoryError: null,
                 categorySuccess: action.message
             }
+        case 'ITEM_ERROR':
+            return {
+                ...state,
+                itemError: action.message
+            }
+        case 'ITEM_SUCCESS':
+            return {
+                ...state,
+                itemError: null,
+                itemSuccess: action.message
+            }
         default:
             return state;
     }

@@ -24,7 +24,6 @@ export const validatePhone = (phone) => {
 
 export const validatePhoto = (photo) => {
     return (dispatch) => {
-        console.log(photo);
         if (!photo) return dispatch({ type: 'PHOTO_ERROR', message: 'Invalid file has been selected.' });
         let ext = photo.name.toLowerCase().split('.').pop();
         if (ext === 'jpg' || ext === 'jpeg' || ext === 'png' || ext === 'gif' || ext === 'svg') dispatch({ type: 'PHOTO_ERROR' });
@@ -34,7 +33,7 @@ export const validatePhoto = (photo) => {
 
 export const validateAddress = (address) => {
     return (dispatch) => {
-        if(address.length < 50) dispatch({ type:'ADDRESS_ERROR', message: 'Please provide full address. (50 characters minimum)' });
+        if(address.length < 50) dispatch({ type:'ADDRESS_ERROR', message: 'This field must contain 50 or more characters.' });
         else dispatch({ type: 'ADDRESS_ERROR' });
     };
 };
@@ -53,4 +52,11 @@ export const validateMatch = (first, second) => {
         if(first !== second) dispatch({ type: 'MISMATCH_ERROR', message: 'Fields don\'t match.' });
         else dispatch({ type: 'MISMATCH_ERROR' });
     };
+};
+
+export const validatePrice = (val) => {
+    return (dispatch) => {
+        if(val < 50) dispatch({ type: 'PRICE_ERROR', message: 'Price must minimum 50 Pkr.' });
+        else dispatch({ type: 'PRICE_ERROR' });
+    }
 };
