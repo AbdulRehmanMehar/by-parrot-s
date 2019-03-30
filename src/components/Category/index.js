@@ -24,12 +24,11 @@ class Category extends Component {
         }
         
         if(params.get('section') === 'add'){
-            component = <Add />
+            component = <Add />;
         }else if(params.get('section') === 'edit'){
-            component = <Add id={params.get('id')} />
+            component = <Add id={params.get('id')} />;
         }else if(params.get('section') === 'view'){
-            component = <View />
-
+            component = <View />;
         }else{
             component = <div>
                 <p>
