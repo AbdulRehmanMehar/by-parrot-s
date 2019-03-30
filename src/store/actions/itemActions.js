@@ -1,6 +1,47 @@
 export const createItem = (item) => {
-    return (dispatch, getState) => {
-        dispatch({ type: 'CREATE_ITEM', item });
+    return (dispatch, getState, { getFirebase }) => {
+        const firebase = getFirebase();
+        const uri = 'item-pictures/' + item.title.toLowerCase().replace(' ', '')
+                     + '_' + item.photo.name.replace(' ', '').replace('?', '');
+        const sref = firebase.storage().ref().child(uri)
+        const dbref = firebase.firestore().collection('items');
+        sref.put(item.photo)
+            .then(_ => {
+                sref.getDownloadURL()
+                    .then(uri => {
+                        dbref.add({
+                            title: item.title,
+                            photo: uri,
+                            price: item.price,
+                            category: item.category,
+                            description: item.description
+                        }).then(_ => {
+                            dispatch({ type: 'ITEM_SUCCESS', message: 'Item was added successfully.' });
+                        }); 
+                    });
+            }).catch(error => dispatch({ type: 'ITEM_ERROR', message: error.message }));
+                
+    };
+};
+
+export const deleteItem = (id) => {
+    return (dispatch, getState, { getFirebase }) => {
+        const firebase = getFirebase();
+        const ref = firebase.firestore().collection('items').doc(id);
+        ref.get()
+            .then(doc => {
+                if(doc.exists){
+                    let raw = decodeURIComponent(doc.data().photo).split('/').pop();
+                    let endIdx = raw.indexOf('?');
+                    let photo = raw.substring(0, endIdx);
+                    const stref = firebase.storage().ref().child('item-pictures/' + photo);
+                    ref.delete()
+                        .then(_ => {
+                            stref.delete()
+                                .then(_ => dispatch({ type: 'ITEM_SUCCESS' }));
+                        });
+                }
+            });
     };
 };
 
