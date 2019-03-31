@@ -8,7 +8,6 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Category from './components/Category';
 import Dashboard from './components/Dashboard';
-import UpdateProfile from './components/UpdateProfile';
 
 class App extends Component {
   render() {
@@ -20,7 +19,6 @@ class App extends Component {
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
           <Route path="/dashboard" component={Dashboard} />
-          <Route path="/update-profile" component={UpdateProfile} />
           <Route path="/manage-items" component={Item} />
           <Route path="/manage-categories" component={Category} />
         </div>

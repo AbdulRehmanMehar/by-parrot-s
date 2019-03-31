@@ -2,7 +2,7 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 import React, { Component } from 'react';
 import { firestoreConnect } from 'react-redux-firebase';
-import { createItem } from '../../store/actions/itemActions';
+import { createItem, updateItem } from '../../store/actions/itemActions';
 import { validateName, validatePhoto, validatePrice, validateAddress } from '../../store/actions/validationActions';
 
 class Add extends Component{
@@ -10,6 +10,7 @@ class Add extends Component{
     constructor(props) {
         super(props);
         this.state = {
+            id: '',
             title: '',
             photo: '',
             price: '',
@@ -22,6 +23,7 @@ class Add extends Component{
     componentDidMount() {
         if(this.props.id && this.props.items){
             let item = this.props.items.filter(item => item.id === this.props.id)[0];
+            this.setState({ id: this.props.id });
             this.setState({ title: item.title });
             this.setState({ price: item.price });
             this.setState({ category: item.category });
@@ -61,7 +63,8 @@ class Add extends Component{
 
     submit(event) {
         event.preventDefault();
-        this.props.add(this.state);
+        if(this.state.isEdit) this.props.edit(this.state);
+        else this.props.add(this.state);
         this.setState({ title: '' });
         this.setState({ price: '' });
         this.setState({ photo: '' });
@@ -148,6 +151,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         add: (data) => dispatch(createItem(data)),
+        edit: (data) => dispatch(updateItem(data)),
         name: (name) => dispatch(validateName(name)),
         price: (val) => dispatch(validatePrice(val)),
         photo: (photo) => dispatch(validatePhoto(photo)),

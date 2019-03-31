@@ -16,12 +16,10 @@ class Dashboard extends Component{
                     </p>
                     <hr className="my-4" />
                     <p>Actions: </p>
-                    <Link to="/update-profile" className="btn btn-primary mr-2">Update Profile</Link>
                     { this.props.profile.admin ? 
                         <span>
                             <Link to="manage-items" className="btn btn-primary mr-2">Manage Items</Link>
                             <Link to="manage-categories" className="btn btn-primary mr-2">Manage Categories</Link>
-                            <Link to="view-orders"  className="btn btn-primary mr-2">View Orders</Link>
                         </span>
                     : null }
                 </div>

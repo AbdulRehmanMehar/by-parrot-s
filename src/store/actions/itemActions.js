@@ -24,6 +24,56 @@ export const createItem = (item) => {
     };
 };
 
+export const updateItem = (item) => {
+    return (dispatch, getState, { getFirebase }) => {
+        const firebase = getFirebase();
+        let ref = firebase.firestore().collection('items').doc(item.id);
+        if(item.photo){
+            const stref = firebase.storage().ref();
+            let url = 'item-pictures/' + item.title.toLowerCase().replace(' ', '')
+                + '_' + item.photo.name.replace(' ', '').replace('?', '');
+            ref.get()
+                .then(doc => {
+                    if (doc.exists) {
+                        if(doc.data().photo){
+                            let raw = decodeURIComponent(doc.data().photo).split('/').pop();
+                            let endIdx = raw.indexOf('?');
+                            let photo = raw.substring(0, endIdx);
+                            stref.child('item-pictures/' + photo).delete()
+                                .then(_ => {
+                                    stref.child(url).put(item.photo)
+                                        .then(_ => {
+                                            stref.getDownloadURL()
+                                                .then(uri => {
+                                                    ref.update({
+                                                        photo: uri
+                                                    });
+                                                });
+                                        });
+                                });
+                            }else{
+                                stref.child(url).put(item.photo)
+                                    .then(_ => {
+                                        stref.child(url).getDownloadURL()
+                                            .then(uri => {
+                                                ref.update({
+                                                    photo: uri
+                                                });
+                                            });
+                                    });
+                            }
+                    }
+                });
+        }
+        ref.update({
+            title: item.title,
+            price: item.price,
+            category: item.category,
+            description: item.description
+        }).then(_ => dispatch({ type: 'ITEM_SUCCESS', message: 'Item was updated successfully.' }));
+    };
+};
+
 export const deleteItem = (id) => {
     return (dispatch, getState, { getFirebase }) => {
         const firebase = getFirebase();

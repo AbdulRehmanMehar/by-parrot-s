@@ -19,13 +19,12 @@ class View extends Component{
             item = this.props.items.map(item => {
                 let category = this.props.categories.filter(cat => cat.id === item.category)[0];
                 return (
-                    <tr key={item.key}>
+                    <tr key={item.id}>
                         <td>{i++}</td>
                         <td>{item.title}</td>
                         <td>{item.price}</td>
-                        <td>{category ? category.name : 'Uncatgorized'}</td>
+                        <td>{category ? category.name : 'Uncategorized'}</td>
                         <td>
-                            <Link to={"/manage-items?section=edit&id=" + item.id}>View</Link> | 
                             <Link to={"/manage-items?section=edit&id="+item.id}> Edit</Link> | 
                             <Link to="#" onClick={this.delete.bind(this)} id={item.id}> Delete</Link> 
                         </td>

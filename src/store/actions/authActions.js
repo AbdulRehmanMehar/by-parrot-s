@@ -41,6 +41,7 @@ export const registerUser = (credentials) => {
                                     }).then(_ => {
                                         let db = firebase.firestore();
                                         db.collection('users').doc(user.uid).set({
+                                            admin: true,
                                             email: user.email,
                                             photo: user.photoURL,
                                             name: user.displayName,
